@@ -20,7 +20,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#072a40;font-family:
 #pf{position:absolute;bottom:0;width:100%;height:0%;background:linear-gradient(to top,#4caf50,#ffeb3b,#f44336)}
 #msg{position:fixed;top:32%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#ffd54f;padding:12px 24px;border-radius:14px;border:2px solid #ffd54f;font-size:24px;font-weight:900;display:none;z-index:25}
 #ov{position:fixed;inset:0;background:rgba(1,42,74,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px;z-index:30}
-#st{background:#ffb300;color:#012a4a;border:none;padding:18px 48px;border-radius:30px;font-size:20px;font-weight:800;margin-top:20px;touch-action:manipulation}
+#st{background:#ffb300;color:#012a4a;border:none;padding:18px 48px;border-radius:30px;font-size:20px;font-weight:800;margin-top:20px;touch-action:manipulation;cursor:pointer}
 </style>
 </head>
 <body>
@@ -49,8 +49,9 @@ const wm=new THREE.MeshLambertMaterial({color:0xeceff1});
 function mkSw(t,gk){const r=new THREE.Group(),sk=new THREE.MeshLambertMaterial({color:0xffcc80}),cm=new THREE.MeshLambertMaterial({color:gk?0xd32f2f:(t=='blue'?0x1565c0:0xf5f5f5)}),bd=new THREE.Mesh(new THREE.BoxGeometry(.62,.25,.35),sk),hd=new THREE.Mesh(new THREE.SphereGeometry(.16,12,12),sk),cp=new THREE.Mesh(new THREE.SphereGeometry(.17,12,12,0,Math.PI*2,0,Math.PI*.6),cm),aL=new THREE.Mesh(new THREE.CylinderGeometry(.05,.04,.46),sk),aR=aL.clone(),rg=new THREE.Mesh(new THREE.RingGeometry(.5,.62,20),new THREE.MeshBasicMaterial({color:0xffeb3b,side:THREE.DoubleSide}));bd.position.y=.05;hd.position.set(0,.32,-.05);cp.position.copy(hd.position);aL.position.set(-.35,.22,-.05);aR.position.set(.35,.22,-.05);rg.rotation.x=-Math.PI/2;rg.position.y=.03;rg.visible=false;r.add(bd,hd,cp,aL,aR,rg);scene.add(r);return{r,aL,aR,rg}}
 const bm=new THREE.Mesh(new THREE.SphereGeometry(.14,12,12),new THREE.MeshLambertMaterial({color:0xffd600}));scene.add(bm);
 const ball={p:new THREE.Vector3(0,.15,0),v:new THREE.Vector3(),ow:null},pls=[];let ct=null,sb=0,sw=0,tl=120,run=false,yaw=0;
-const fB=[[0,L/2-.8,1],[-5,8,0],,,[-6,-2,0],[6,-2,0],[0,-4,0]],fW=[[0,-L/2+.8,1],[-5,-8,0],[5,-8,0],[0,-4,0],[-6,2,0],,];
-function init(){pls.forEach(p=>scene.remove(p.m.r));pls.length=0;fB.forEach(f=>pls.push({t:'blue',gk:!!f,h:new THREE.Vector3(f,0,f),p:new THREE.Vector3(f,0,f),y:0,ph:Math.random()*6,m:mkSw('blue',!!f)}));fW.forEach(f=>pls.push({t:'white',gk:!!f,h:new THREE.Vector3(f,0,f),p:new THREE.Vector3(f,0,f),y:Math.PI,ph:Math.random()*6,m:mkSw('white',!!f)}));rst('blue')}
+const fB=[{x:0,z:L/2-.8,g:1},{x:-5,z:8,g:0},{x:5,z:8,g:0},{x:0,z:4,g:0},{x:-6,z:-2,g:0},{x:6,z:-2,g:0},{x:0,z:-4,g:0}];
+const fW=[{x:0,z:-L/2+.8,g:1},{x:-5,z:-8,g:0},{x:5,z:-8,g:0},{x:0,z:-4,g:0},{x:-6,z:2,g:0},{x:6,z:2,g:0},{x:0,z:4,g:0}];
+function init(){pls.forEach(p=>scene.remove(p.m.r));pls.length=0;fB.forEach(f=>pls.push({t:'blue',gk:!!f.g,h:new THREE.Vector3(f.x,0,f.z),p:new THREE.Vector3(f.x,0,f.z),y:0,ph:Math.random()*6,m:mkSw('blue',!!f.g)}));fW.forEach(f=>pls.push({t:'white',gk:!!f.g,h:new THREE.Vector3(f.x,0,f.z),p:new THREE.Vector3(f.x,0,f.z),y:Math.PI,ph:Math.random()*6,m:mkSw('white',!!f.g)}));rst('blue')}
 function rst(t){pls.forEach(p=>{p.p.copy(p.h);p.y=p.t=='blue'?0:Math.PI});const s=pls.find(p=>p.t==t&&!p.gk&&p.h.z==(t=='blue'?4:-4));gv(s);if(t!='blue')sCt(pls.find(p=>p.t=='blue'&&!p.gk))}
 function gv(p){ball.ow=p;ball.v.set(0,0,0);if(p&&p.t=='blue')sCt(p)}
 function sCt(p){if(ct)ct.m.rg.visible=false;ct=p;if(ct){ct.m.rg.visible=true;yaw=ct.y}}
@@ -60,12 +61,10 @@ joy.addEventListener('touchmove',e=>{e.preventDefault();for(let t of e.changedTo
 joy.addEventListener('touchend',e=>{for(let t of e.changedTouches)if(t.identifier===jId){jId=null;jv={x:0,y:0};kn.style.transform=''}});
 function mJ(t){const r=joy.getBoundingClientRect();let dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy);if(d>40){dx=dx/d*40;dy=dy/d*40}kn.style.transform=`translate(${dx}px,${dy}px)`;jv={x:dx/40,y:dy/40}}
 let cId=null,lx=0;box.addEventListener('touchstart',e=>{cId=e.changedTouches.identifier;lx=e.changedTouches.clientX},{passive:true});
-box.addEventListener('touchmove',e=>{for(let t of e.changedTouches)if(t.identifier===cId){yaw-=(t.clientX-lx)*.008;lx=t.clientX;if(ct)ct.y=yaw}},{passive:true});
+box.addEventListener('touchmove',e=>{for(let t of e.changedTouches)if(t.identifier===cId){yaw-=(t.clientX-lx)*.008;lx=t.clientX;if(ctrl)ct.y=yaw}},{passive:true});
 document.getElementById('ps').addEventListener('touchstart',e=>{e.preventDefault();if(!run||!ct)return;if(ball.ow!==ct){let b=null,md=999;pls.filter(p=>p.t=='blue').forEach(p=>{let d=p.p.distanceTo(ball.p);if(d<md){md=d;b=p}});if(b)sCt(b);return}const fw=new THREE.Vector3(-Math.sin(ct.y),0,-Math.cos(ct.y));let tg=null,bs=-999;pls.filter(p=>p.t=='blue'&&p!==ct).forEach(p=>{let to=p.p.clone().sub(ct.p),sc=fw.dot(to.clone().normalize())*10-to.length()*.15;if(sc>bs){bs=sc;tg=p}});if(tg){let df=tg.p.clone().sub(ball.p),t=Math.max(.25,Math.hypot(df.x,df.z)/14);ball.ow=null;ball.v.set(df.x/t,4.9*t*.45,df.z/t);sCt(tg)}},{passive:false});
 let chg=false,pwr=0;const pW=document.getElementById('pw'),pF=document.getElementById('pf');
 document.getElementById('sh').addEventListener('touchstart',e=>{e.preventDefault();if(!run||ball.ow!==ct)return;chg=true;pwr=.3;pW.style.display='block'},{passive:false});
 document.getElementById('sh').addEventListener('touchend',e=>{e.preventDefault();if(!chg)return;chg=false;pW.style.display='none';if(ball.ow===ct){const aim=new THREE.Vector3(-Math.sin(ct.y),0,-Math.cos(ct.y)),toG=new THREE.Vector3((Math.random()-.5)*2.2,.5,-L/2+.2).sub(ct.p).normalize(),dir=aim.dot(toG)>.4?aim.lerp(toG,.65).normalize():aim,spd=13+pwr*12;ball.ow=null;ball.v.set(dir.x*spd,2.2+pwr*2.4,dir.z*spd)}},{passive:false});
 function bnr(t){const m=document.getElementById('msg');m.textContent=t;m.style.display='block';setTimeout(()=>m.style.display='none',1600)}
-const rC=document.getElementById('rad').getContext('2d');let last=performance.now(),tA=0;
-  
   
