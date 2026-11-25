@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Water Polo 3D</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #072a40; font-family: system-ui, -apple-system, sans-serif; touch-action: none; }
+    #game-container { position: fixed; inset: 0; width: 100%; height: 100%; }
+
+    /* Верхняя панель: радар + счет */
+    #hud-top {
+      position: fixed; top: 12px; left: 12px; right: 12px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      pointer-events: none; z-index: 10;
+    }
+    #radar {
+      width: 76px; height: 114px;
+      background: rgba(6, 38, 58, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+    }
+    #scoreboard {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(6, 38, 58, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 8px 14px; border-radius: 20px;
+      color: #fff; font-weight: 700; font-size: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .team-badge { display: flex; align-items: center; gap: 6px; }
+    .dot-blue { width: 12px; height: 12px; border-radius: 50%; background: #1e88e5; border: 2px solid #fff; }
+    .dot-white { width: 12px; height: 12px; border-radius: 50%; background: #f5f5f5; border: 2px solid #90a4ae; }
+    #timer { color: #ffd54f; font-variant-numeric: tabular-nums; }
+
+    /* Левый стик */
+    #joystick-zone {
+      position: fixed; bottom: 24px; left: 20px;
+      width: 130px; height: 130px; z-index: 15;
+    }
+    #joystick-base {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.16);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+    }
+    #joystick-knob {
+      position: absolute; width: 52px; height: 52px;
+      left: 39px; top: 39px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.04s linear;
+    }
+
+    /* Правые кнопки */
+    #controls-right {
+      position: fixed; bottom: 32px; right: 20px;
+      display: flex; flex-direction: column; gap: 14px; align-items: center;
+      z-index: 15;
+    }
+    .action-btn {
+      width: 78px; height: 78px; border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.85);
+      color: #fff; font-weight: 800; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    #btn-shoot { background: linear-gradient(135deg, #ff5722, #d84315); }
+    #btn-pass { background: linear-gradient(135deg, #0288d1, #01579b); width: 68px; height: 68px; font-size: 13px; }
+    .action-btn:active { transform: scale(0.93); }
+
+    /* Индикатор силы броска */
+    #power-bar-wrap {
+      position: fixed; bottom: 196px; right: 44px;
+      width: 14px; height: 90px; border-radius: 8px;
+      background: rgba(0, 0, 0, 0.5); border: 2px solid #fff;
+      overflow: hidden; display: none; z-index: 15;
+    }
+    #power-bar-fill {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 0%;
+      background: linear-gradient(to top, #4caf50, #ffeb3b, #f44336);
+    }
+
+    /* Уведомления (ГОЛ!) */
+    #banner {
+      position: fixed; top: 32%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(0, 0, 0, 0.78); color: #ffd54f;
+      padding: 14px 28px; border-radius: 16px; border: 2px solid #ffd54f;
+      font-size: 28px; font-weight: 900; letter-spacing: 1px;
+      opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 25;
+      text-align: center;
+    }
+    #banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    /* Стартовый / финальный экран */
+    #overlay {
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at center, rgba(2, 119, 189, 0.88), rgba(1, 42, 74, 0.96));
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff; text-align: center; padding: 24px; z-index: 30;
+    }
+    #overlay h1 { font-size: 32px; margin-bottom: 10px; text-shadow: 0 3px 10px rgba(0,0,0,0.4); }
+    #overlay p { font-size: 15px; line-height: 1.5; max-width: 320px; color: #e1f5fe; margin-bottom: 24px; }
+    #start-btn {
+      background: #ffb300; color: #012a4a; border: none;
+      padding: 16px 42px; border-radius: 30px; font-size: 18px; font-weight: 800;
+      box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <div id="hud-top">
+    <canvas id="radar" width="76" height="114"></canvas>
+    <div id="scoreboard">
+      <div class="team-badge"><span class="dot-blue"></span><span id="score-blue">0</span></div>
+      <div id="timer">02:00</div>
+      <div class="team-badge"><span id="score-white">0</span><span class="dot-white"></span></div>
+    </div>
+  </div>
+
+  <div id="joystick-zone">
+    <div id="joystick-base"></div>
+    <div id="joystick-knob"></div>
+  </div>
+
+  <div id="power-bar-wrap"><div id="power-bar-fill"></div></div>
+
+  <div id="controls-right">
+    <button id="btn-shoot" class="action-btn">БРОСОК</button>
+    <button id="btn-pass" class="action-btn">ПАС</button>
+  </div>
+
+  <div id="banner">ГОЛ!</div>
+
+  <div id="overlay">
+    <h1>ВОДНОЕ ПОЛО 3D</h1>
+    <p>
+      <b>Левый стик</b> — плыть<br>
+      <b>Свайп по экрану</b> — поворот камеры<br>
+      <b>ПАС</b> — пас партнеру по взгляду<br>
+      <b>БРОСОК</b> — удерж. для силы удара
+    </p>
+    <button id="start-btn">ИГРАТЬ</button>
+  </div>
+
+  <script src="https://cloudflare.com"></script>
+  <script>
+    // --- ЗВУКИ (Web Audio API) ---
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function playWhistle() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(2800, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(3100, audioCtx.currentTime + 0.15);
+      osc.frequency.linearRampToValueAtTime(2750, audioCtx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+    }
+    function playSplash() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      const bufferSize = audioCtx.sampleRate * 0.25;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.08));
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass'; filter.frequency.value = 900;
+      const gain = audioCtx.createGain(); gain.gain.value = 0.2;
+      noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+      noise.start();
+    }
+
+    // --- ПАРАМЕТРЫ БАССЕЙНА (20м x 30м) ---
+    const POOL_W = 20;
+    const POOL_L = 30;
+    const GOAL_W = 3.0;
+    const GOAL_H = 1.0;
+
+    // --- СЦЕНА И КАМЕРА ---
+    const container = document.getElementById('game-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x81d4fa);
+    scene.fog = new THREE.FogExp2(0x81d4fa, 0.014);
+
+    const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // Освещение
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0288d1, 0.95);
+    scene.add(hemiLight);
+    const dirLight = new THREE.DirectionalLight(0xfffde7, 0.85);
+    dirLight.position.set(12, 22, 10);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Вода
+    const waterGeo = new THREE.PlaneGeometry(POOL_W, POOL_L, 24, 36);
+    const waterMat = new THREE.MeshPhongMaterial({
+      color: 0x00acc1,
+      emissive: 0x004d60,
+      specular: 0xffffff,
+      shininess: 90,
+      transparent: true,
+      opacity: 0.88
+    });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI / 2;
+    scene.add(water);
+
+    // Дно бассейна с разметкой
+    const floorGeo = new THREE.PlaneGeometry(POOL_W, POOL_L);
+    const floorMat = new THREE.MeshBasicMaterial({ color: 0x26c6da });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1.2;
+    scene.add(floor);
+
+    // Бортики и линии разметки (2м красная, 5м желтая, центр белая)
+    function createWallsAndLines() {
+      const wallMat = new THREE.MeshLambertMaterial({ color: 0xeceff1 });
+      const sideGeo = new THREE.BoxGeometry(0.8, 0.8, POOL_L + 1.6);
+      const endGeo = new THREE.BoxGeometry(POOL_W + 1.6, 0.8, 0.8);
+
+      const leftW = new THREE.Mesh(sideGeo, wallMat); leftW.position.set(-POOL_W/2 - 0.4, 0.2, 0); scene.add(leftW);
+      const rightW = new THREE.Mesh(sideGeo, wallMat); rightW.position.set(POOL_W/2 + 0.4, 0.2, 0); scene.add(rightW);
+    
