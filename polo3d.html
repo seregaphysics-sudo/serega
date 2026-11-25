@@ -6,236 +6,123 @@
   <title>Water Polo 3D</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #072a40; font-family: system-ui, -apple-system, sans-serif; }
-    #game-container { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; }
-
-    /* Верхняя панель: радар + счет */
-    #hud-top {
-      position: fixed; top: 12px; left: 12px; right: 12px;
-      display: flex; justify-content: space-between; align-items: flex-start;
-      pointer-events: none; z-index: 10;
-    }
-    #radar {
-      width: 76px; height: 114px;
-      background: rgba(6, 38, 58, 0.65);
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      border-radius: 8px;
-    }
-    #scoreboard {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(6, 38, 58, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      padding: 8px 14px; border-radius: 20px;
-      color: #fff; font-weight: 700; font-size: 16px;
-    }
-    .team-badge { display: flex; align-items: center; gap: 6px; }
-    .dot-blue { width: 12px; height: 12px; border-radius: 50%; background: #1e88e5; border: 2px solid #fff; }
-    .dot-white { width: 12px; height: 12px; border-radius: 50%; background: #f5f5f5; border: 2px solid #90a4ae; }
-    #timer { color: #ffd54f; font-variant-numeric: tabular-nums; }
-
-    /* Левый стик */
-    #joystick-zone {
-      position: fixed; bottom: 28px; left: 20px;
-      width: 130px; height: 130px; z-index: 15; touch-action: none;
-    }
-    #joystick-base {
-      position: absolute; inset: 0; border-radius: 50%;
-      background: rgba(255, 255, 255, 0.18);
-      border: 2px solid rgba(255, 255, 255, 0.4);
-    }
-    #joystick-knob {
-      position: absolute; width: 52px; height: 52px;
-      left: 39px; top: 39px; border-radius: 50%;
-      background: rgba(255, 255, 255, 0.8);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    /* Правые кнопки */
-    #controls-right {
-      position: fixed; bottom: 36px; right: 20px;
-      display: flex; flex-direction: column; gap: 14px; align-items: center;
-      z-index: 15; touch-action: none;
-    }
-    .action-btn {
-      width: 78px; height: 78px; border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.85);
-      color: #fff; font-weight: 800; font-size: 14px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-      touch-action: manipulation;
-    }
-    #btn-shoot { background: linear-gradient(135deg, #ff5722, #d84315); }
-    #btn-pass { background: linear-gradient(135deg, #0288d1, #01579b); width: 68px; height: 68px; font-size: 13px; }
-    .action-btn:active { transform: scale(0.93); }
-
-    /* Индикатор силы броска */
-    #power-bar-wrap {
-      position: fixed; bottom: 202px; right: 44px;
-      width: 14px; height: 90px; border-radius: 8px;
-      background: rgba(0, 0, 0, 0.5); border: 2px solid #fff;
-      overflow: hidden; display: none; z-index: 15;
-    }
-    #power-bar-fill {
-      position: absolute; bottom: 0; left: 0; right: 0; height: 0%;
-      background: linear-gradient(to top, #4caf50, #ffeb3b, #f44336);
-    }
-
-    /* Уведомления (ГОЛ!) */
-    #banner {
-      position: fixed; top: 32%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
-      background: rgba(0, 0, 0, 0.78); color: #ffd54f;
-      padding: 14px 28px; border-radius: 16px; border: 2px solid #ffd54f;
-      font-size: 26px; font-weight: 900; letter-spacing: 1px;
-      opacity: 0; pointer-events: none; transition: all 0.25s ease; z-index: 25;
-      text-align: center;
-    }
-    #banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-
-    /* Стартовый / финальный экран */
-    #overlay {
-      position: fixed; inset: 0;
-      background: radial-gradient(circle at center, rgba(2, 119, 189, 0.92), rgba(1, 42, 74, 0.97));
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #fff; text-align: center; padding: 24px; z-index: 30;
-      touch-action: manipulation;
-    }
-    #overlay h1 { font-size: 32px; margin-bottom: 10px; text-shadow: 0 3px 10px rgba(0,0,0,0.4); }
-    #overlay p { font-size: 15px; line-height: 1.5; max-width: 320px; color: #e1f5fe; margin-bottom: 24px; }
-    #start-btn {
-      background: #ffb300; color: #012a4a; border: none;
-      padding: 18px 48px; border-radius: 32px; font-size: 20px; font-weight: 800;
-      box-shadow: 0 8px 20px rgba(255, 179, 0, 0.45);
-      touch-action: manipulation; cursor: pointer;
-    }
-    #start-btn:active { transform: scale(0.95); }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #072a40; font-family: system-ui, sans-serif; }
+    #game { position: fixed; inset: 0; touch-action: none; }
+    #hud { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
+    #radar { width: 72px; height: 108px; background: rgba(6,38,58,0.65); border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; }
+    #score { display: flex; align-items: center; gap: 10px; background: rgba(6,38,58,0.75); border: 1px solid rgba(255,255,255,0.35); padding: 8px 14px; border-radius: 20px; color: #fff; font-weight: 700; height: fit-content; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    #joy { position: fixed; bottom: 28px; left: 20px; width: 126px; height: 126px; border-radius: 50%; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.4); z-index: 15; touch-action: none; }
+    #knob { position: absolute; width: 50px; height: 50px; left: 36px; top: 36px; border-radius: 50%; background: rgba(255,255,255,0.85); }
+    #btns { position: fixed; bottom: 34px; right: 20px; display: flex; flex-direction: column; gap: 14px; align-items: center; z-index: 15; }
+    .btn { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #fff; color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.35); touch-action: manipulation; }
+    #shoot { background: #e64a19; }
+    #pass { background: #0277bd; width: 66px; height: 66px; }
+    #pwr { position: fixed; bottom: 196px; right: 44px; width: 14px; height: 85px; background: rgba(0,0,0,0.5); border: 2px solid #fff; border-radius: 8px; display: none; overflow: hidden; z-index: 15; }
+    #pwr-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, #4caf50, #ffeb3b, #f44336); }
+    #msg { position: fixed; top: 32%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.8); color: #ffd54f; padding: 12px 24px; border-radius: 14px; border: 2px solid #ffd54f; font-size: 24px; font-weight: 900; display: none; z-index: 25; text-align: center; }
+    #ov { position: fixed; inset: 0; background: rgba(1,42,74,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 24px; z-index: 30; }
+    #ov h1 { font-size: 30px; margin-bottom: 12px; }
+    #ov p { font-size: 15px; line-height: 1.5; color: #e1f5fe; margin-bottom: 24px; }
+    #start { background: #ffb300; color: #012a4a; border: none; padding: 18px 48px; border-radius: 30px; font-size: 20px; font-weight: 800; touch-action: manipulation; }
   </style>
 </head>
 <body>
-  <div id="game-container"></div>
-
-  <div id="hud-top">
-    <canvas id="radar" width="76" height="114"></canvas>
-    <div id="scoreboard">
-      <div class="team-badge"><span class="dot-blue"></span><span id="score-blue">0</span></div>
-      <div id="timer">02:00</div>
-      <div class="team-badge"><span id="score-white">0</span><span class="dot-white"></span></div>
-    </div>
+  <div id="game"></div>
+  <div id="hud">
+    <canvas id="radar" width="72" height="108"></canvas>
+    <div id="score"><span class="dot" style="background:#1e88e5"></span><span id="sb">0</span> <span id="tm" style="color:#ffd54f">02:00</span> <span id="sw">0</span><span class="dot" style="background:#fff"></span></div>
   </div>
-
-  <div id="joystick-zone">
-    <div id="joystick-base"></div>
-    <div id="joystick-knob"></div>
-  </div>
-
-  <div id="power-bar-wrap"><div id="power-bar-fill"></div></div>
-
-  <div id="controls-right">
-    <button id="btn-shoot" class="action-btn">БРОСОК</button>
-    <button id="btn-pass" class="action-btn">ПАС</button>
-  </div>
-
-  <div id="banner">ГОЛ!</div>
-
-  <div id="overlay">
+  <div id="joy"><div id="knob"></div></div>
+  <div id="pwr"><div id="pwr-fill"></div></div>
+  <div id="btns"><button id="shoot" class="btn">БРОСОК</button><button id="pass" class="btn">ПАС</button></div>
+  <div id="msg">ГОЛ!</div>
+  <div id="ov">
     <h1>ВОДНОЕ ПОЛО 3D</h1>
-    <p>
-      <b>Левый стик</b> — плыть<br>
-      <b>Свайп по экрану</b> — поворот камеры<br>
-      <b>ПАС</b> — пас партнеру по взгляду<br>
-      <b>БРОСОК</b> — удерж. для силы удара
-    </p>
-    <button id="start-btn" type="button">ИГРАТЬ</button>
+    <p><b>Левый стик</b> — плыть<br><b>Свайп</b> — поворот камеры<br><b>ПАС</b> — пас партнеру<br><b>БРОСОК</b> — удерж. для силы</p>
+    <button id="start" type="button">ИГРАТЬ</button>
   </div>
-
   <script src="https://unpkg.com"></script>
   <script>
-    function initApp() {
-      if (typeof THREE === 'undefined') {
-        document.querySelector('#overlay p').innerHTML = 'Не удалось загрузить 3D-движок.<br>Проверь интернет и обнови страницу.';
-        return;
-      }
+    const W = 20, L = 30, GW = 3, GH = 1;
+    const box = document.getElementById('game');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x81d4fa);
+    const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    box.appendChild(renderer.domElement);
 
-      // --- ЗВУКИ (Web Audio API) ---
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      let audioCtx = null;
-      function playWhistle() {
-        try {
-          if (!audioCtx) audioCtx = new AudioCtx();
-          if (audioCtx.state === 'suspended') audioCtx.resume();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(2800, audioCtx.currentTime);
-          osc.frequency.linearRampToValueAtTime(3100, audioCtx.currentTime + 0.15);
-          osc.frequency.linearRampToValueAtTime(2750, audioCtx.currentTime + 0.35);
-          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-        } catch (e) {}
-      }
-      function playSplash() {
-        try {
-          if (!audioCtx) audioCtx = new AudioCtx();
-          if (audioCtx.state === 'suspended') audioCtx.resume();
-          const bufferSize = audioCtx.sampleRate * 0.25;
-          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.08));
-          const noise = audioCtx.createBufferSource();
-          noise.buffer = buffer;
-          const filter = audioCtx.createBiquadFilter();
-          filter.type = 'bandpass'; filter.frequency.value = 900;
-          const gain = audioCtx.createGain(); gain.gain.value = 0.2;
-          noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-          noise.start();
-        } catch (e) {}
-      }
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x0288d1, 1));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(10, 20, 10); scene.add(dl);
 
-      // --- ПАРАМЕТРЫ БАССЕЙНА ---
-      const POOL_W = 20;
-      const POOL_L = 30;
-      const GOAL_W = 3.0;
-      const GOAL_H = 1.0;
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(W, L), new THREE.MeshPhongMaterial({ color: 0x00acc1, shininess: 80, transparent: true, opacity: 0.88 }));
+    water.rotation.x = -Math.PI / 2; scene.add(water);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, L), new THREE.MeshBasicMaterial({ color: 0x26c6da }));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -1.2; scene.add(floor);
 
-      // --- СЦЕНА И КАМЕРА ---
-      const container = document.getElementById('game-container');
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x81d4fa);
-      scene.fog = new THREE.FogExp2(0x81d4fa, 0.014);
+    const wm = new THREE.MeshLambertMaterial({ color: 0xeceff1 });
+    [[-W/2-0.4, 0, 0.8, L+1.6], [W/2+0.4, 0, 0.8, L+1.6], [0, -L/2-0.4, W+1.6, 0.8], [0, L/2+0.4, W+1.6, 0.8]].forEach(a => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(a[2], 0.8, a[3]), wm); m.position.set(a[0], 0.2, a[1]); scene.add(m);
+    });
+    [[0, 0xffffff], [-L/2+2, 0xe53935], [L/2-2, 0xe53935], [-L/2+5, 0xffeb3b], [L/2-5, 0xffeb3b]].forEach(l => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(W+0.9, 0.12, 0.15), new THREE.MeshBasicMaterial({ color: l[1] })); m.position.set(0, 0.58, l[0]); scene.add(m);
+    });
 
-      const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 100);
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
+    [-L/2+0.2, L/2-0.2].forEach(z => {
+      const g = new THREE.Group(), pm = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,GH), pm); p1.position.set(-GW/2, GH/2, 0);
+      const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,GH), pm); p2.position.set(GW/2, GH/2, 0);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,GW+0.12), pm); top.rotation.z = Math.PI/2; top.position.set(0, GH, 0);
+      const net = new THREE.Mesh(new THREE.BoxGeometry(GW, GH, 0.8), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.4 }));
+      net.position.set(0, GH/2, z < 0 ? -0.4 : 0.4);
+      g.add(p1, p2, top, net); g.position.set(0, 0, z); scene.add(g);
+    });
 
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0288d1, 0.95);
-      scene.add(hemiLight);
-      const dirLight = new THREE.DirectionalLight(0xfffde7, 0.85);
-      dirLight.position.set(12, 22, 10);
-      scene.add(dirLight);
+    function makeSwimmer(team, gk) {
+      const root = new THREE.Group();
+      const skin = new THREE.MeshLambertMaterial({ color: 0xffcc80 });
+      const capM = new THREE.MeshLambertMaterial({ color: gk ? 0xd32f2f : (team === 'blue' ? 0x1565c0 : 0xf5f5f5) });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.25, 0.35), skin); body.position.y = 0.05;
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), skin); head.position.set(0, 0.32, -0.05);
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 12, 0, Math.PI*2, 0, Math.PI*0.6), capM); cap.position.copy(head.position);
+      const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.46), skin); armL.position.set(-0.35, 0.22, -0.05);
+      const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.46), skin); armR.position.set(0.35, 0.22, -0.05);
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.62, 20), new THREE.MeshBasicMaterial({ color: 0xffeb3b, side: THREE.DoubleSide }));
+      ring.rotation.x = -Math.PI/2; ring.position.y = 0.03; ring.visible = false;
+      root.add(body, head, cap, armL, armR, ring); scene.add(root);
+      return { root, armL, armR, ring };
+    }
 
-      // Вода
-      const waterGeo = new THREE.PlaneGeometry(POOL_W, POOL_L, 20, 30);
-      const waterMat = new THREE.MeshPhongMaterial({
-        color: 0x00acc1, emissive: 0x004d60, specular: 0xffffff,
-        shininess: 90, transparent: true, opacity: 0.88
-      });
-      const water = new THREE.Mesh(waterGeo, waterMat);
-      water.rotation.x = -Math.PI / 2;
-      scene.add(water);
+    const ballM = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), new THREE.MeshLambertMaterial({ color: 0xffd600 }));
+    scene.add(ballM);
+    const ball = { pos: new THREE.Vector3(0,0.15,0), vel: new THREE.Vector3(), owner: null };
+    const players = [];
+    let ctrl = null, sb = 0, sw = 0, tLeft = 120, run = false, yaw = 0;
 
-      const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(POOL_W, POOL_L),
-        new THREE.MeshBasicMaterial({ color: 0x26c6da })
-      );
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -1.2;
-      scene.add(floor);
+    const formB = [[0,L/2-0.8,1],[-5,8,0],[5,8,0],[0,4,0],[-6,-2,0],[6,-2,0],[0,-4,0]];
+    const formW = [[0,-L/2+0.8,1],[-5,-8,0],[5,-8,0],[0,-4,0],[-6,2,0],[6,2,0],[0,4,0]];
 
-      // Бортики и линии разметки
-      function createWallsAndLines() {
-        const wallMat = new THREE.MeshLambertMaterial({ color: 0xeceff1 });
-        const sideGeo = new THREE.BoxGeometry(0.8, 0.8, POOL_L + 1.6);
+    function init() {
+      players.forEach(p => scene.remove(p.m.root)); players.length = 0;
+      formB.forEach(f => players.push({ team: 'blue', gk: !!f[2], home: new THREE.Vector3(f[0],0,f[1]), pos: new THREE.Vector3(f[0],0,f[1]), yaw: 0, ph: Math.random()*6, m: makeSwimmer('blue', !!f[2]) }));
+      formW.forEach(f => players.push({ team: 'white', gk: !!f[2], home: new THREE.Vector3(f[0],0,f[1]), pos: new THREE.Vector3(f[0],0,f[1]), yaw: Math.PI, ph: Math.random()*6, m: makeSwimmer('white', !!f[2]) }));
+      reset('blue');
+    }
+
+    function reset(t) {
+      players.forEach(p => { p.pos.copy(p.home); p.yaw = p.team === 'blue' ? 0 : Math.PI; });
+      const st = players.find(p => p.team === t && !p.gk && p.home.z === (t === 'blue' ? 4 : -4));
+      give(st);
+      if (t !== 'blue') setCtrl(players.find(p => p.team === 'blue' && !p.gk));
+    }
+
+    function give(p) { ball.owner = p; ball.vel.set(0,0,0); if (p && p.team === 'blue') setCtrl(p); }
+    function setCtrl(p) { if (ctrl) ctrl.m.ring.visible = false; ctrl = p; if (ctrl) { ctrl.m.ring.visible = true; yaw = ctrl.yaw; } }
+
+    let jv = { x: 0, y: 0 }, jId = null;
+    const joy = document.getElementById('joy'), knob = document.getElementById('knob');
+    joy.addEventListener('touchstart', e => { e.preventDefault(); jId = e.changedTouches.identifier; moveJoy(e.changedTouches); }, { passive: false });
+    joy.addEventListener('touchmove', e => { e.preventDefault(); for (let t of e.changedTouches) if (t.identifier === jId) moveJoy(t); }, { passive: false });
     
