@@ -19,7 +19,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#072a40;font-family:
 #pw{position:fixed;bottom:196px;right:44px;width:14px;height:85px;background:rgba(0,0,0,.5);border:2px solid #fff;border-radius:8px;display:none;overflow:hidden;z-index:15}
 #pf{position:absolute;bottom:0;width:100%;height:0%;background:linear-gradient(to top,#4caf50,#ffeb3b,#f44336)}
 #msg{position:fixed;top:32%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#ffd54f;padding:12px 24px;border-radius:14px;border:2px solid #ffd54f;font-size:24px;font-weight:900;display:none;z-index:25}
-#ov{position:fixed;inset:0;background:rgba(1,42,74,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px;z-index:30}
+#ov{position:fixed;inset:0;background:rgba(1,42,74,.72);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px;z-index:30}
 #st{background:#ffb300;color:#012a4a;border:none;padding:18px 48px;border-radius:30px;font-size:20px;font-weight:800;margin-top:20px;touch-action:manipulation;cursor:pointer}
 </style>
 </head>
@@ -30,7 +30,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#072a40;font-family:
 <div id="pw"><div id="pf"></div></div>
 <div id="btns"><button id="sh" class="b">БРОСОК</button><button id="ps" class="b">ПАС</button></div>
 <div id="msg">ГОЛ!</div>
-<div id="ov"><h1>ВОДНОЕ ПОЛО 3D</h1><p style="margin-top:10px;line-height:1.5;color:#e1f5fe"><b>Левый стик</b> — плыть<br><b>Свайп</b> — поворот камеры<br><b>ПАС</b> — пас партнеру<br><b>БРОСОК</b> — удерж. для силы</p><button id="st" type="button" onclick="st()">ИГРАТЬ</button></div>
+<div id="ov"><h1>ВОДНОЕ ПОЛО 3D</h1><p style="margin-top:10px;line-height:1.5;color:#e1f5fe"><b>Левый стик</b> — плыть<br><b>Свайп</b> — поворот камеры<br><b>ПАС</b> — пас партнеру<br><b>БРОСОК</b> — удерж. для силы</p><button id="st" type="button">ИГРАТЬ</button></div>
 <script src="https://unpkg.com"></script>
 <script>
 const W=20,L=30,GW=3,GH=1,box=document.getElementById('g'),scene=new THREE.Scene();
@@ -52,7 +52,7 @@ const ball={p:new THREE.Vector3(0,.15,0),v:new THREE.Vector3(),ow:null},pls=[];l
 const fB=[{x:0,z:L/2-.8,g:1},{x:-5,z:8,g:0},{x:5,z:8,g:0},{x:0,z:4,g:0},{x:-6,z:-2,g:0},{x:6,z:-2,g:0},{x:0,z:-4,g:0}];
 const fW=[{x:0,z:-L/2+.8,g:1},{x:-5,z:-8,g:0},{x:5,z:-8,g:0},{x:0,z:-4,g:0},{x:-6,z:2,g:0},{x:6,z:2,g:0},{x:0,z:4,g:0}];
 function init(){pls.forEach(p=>scene.remove(p.m.r));pls.length=0;fB.forEach(f=>pls.push({t:'blue',gk:!!f.g,h:new THREE.Vector3(f.x,0,f.z),p:new THREE.Vector3(f.x,0,f.z),y:0,ph:Math.random()*6,m:mkSw('blue',!!f.g)}));fW.forEach(f=>pls.push({t:'white',gk:!!f.g,h:new THREE.Vector3(f.x,0,f.z),p:new THREE.Vector3(f.x,0,f.z),y:Math.PI,ph:Math.random()*6,m:mkSw('white',!!f.g)}));rst('blue')}
-function rst(t){pls.forEach(p=>{p.p.copy(p.h);p.y=p.t=='blue'?0:Math.PI});const s=pls.find(p=>p.t==t&&!p.gk&&p.h.z==(t=='blue'?4:-4));gv(s);if(t!='blue')sCt(pls.find(p=>p.t=='blue'&&!p.gk))}
+function rst(t){pls.forEach(p=>{p.p.copy(p.h);p.y=p.t=='blue'?0:Math.PI;p.m.r.position.copy(p.p);p.m.r.rotation.y=p.y});const s=pls.find(p=>p.t==t&&!p.gk&&p.h.z==(t=='blue'?4:-4));gv(s);if(t!='blue')sCt(pls.find(p=>p.t=='blue'&&!p.gk))}
 function gv(p){ball.ow=p;ball.v.set(0,0,0);if(p&&p.t=='blue')sCt(p)}
 function sCt(p){if(ct)ct.m.rg.visible=false;ct=p;if(ct){ct.m.rg.visible=true;yaw=ct.y}}
 let jv={x:0,y:0},jId=null;const joy=document.getElementById('joy'),kn=document.getElementById('kn');
@@ -66,5 +66,4 @@ document.getElementById('ps').addEventListener('touchstart',e=>{e.preventDefault
 let chg=false,pwr=0;const pW=document.getElementById('pw'),pF=document.getElementById('pf');
 document.getElementById('sh').addEventListener('touchstart',e=>{e.preventDefault();if(!run||ball.ow!==ct)return;chg=true;pwr=.3;pW.style.display='block'},{passive:false});
 document.getElementById('sh').addEventListener('touchend',e=>{e.preventDefault();if(!chg)return;chg=false;pW.style.display='none';if(ball.ow===ct){const aim=new THREE.Vector3(-Math.sin(ct.y),0,-Math.cos(ct.y)),toG=new THREE.Vector3((Math.random()-.5)*2.2,.5,-L/2+.2).sub(ct.p).normalize(),dir=aim.dot(toG)>.4?aim.lerp(toG,.65).normalize():aim,spd=13+pwr*12;ball.ow=null;ball.v.set(dir.x*spd,2.2+pwr*2.4,dir.z*spd)}},{passive:false});
-function bnr(t){const m=document.getElementById('msg');m.textContent=t;m.style.display='block';setTimeout(()=>m.style.display='none',1600)}
   
