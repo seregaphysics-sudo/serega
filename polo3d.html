@@ -30,7 +30,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#072a40;font-family:
 <div id="pw"><div id="pf"></div></div>
 <div id="btns"><button id="sh" class="b">БРОСОК</button><button id="ps" class="b">ПАС</button></div>
 <div id="msg">ГОЛ!</div>
-<div id="ov"><h1>ВОДНОЕ ПОЛО 3D</h1><p style="margin-top:10px;line-height:1.5;color:#e1f5fe"><b>Левый стик</b> — плыть<br><b>Свайп</b> — поворот камеры<br><b>ПАС</b> — пас партнеру<br><b>БРОСОК</b> — удерж. для силы</p><button id="st" type="button">ИГРАТЬ</button></div>
+<div id="ov"><h1>ВОДНОЕ ПОЛО 3D</h1><p style="margin-top:10px;line-height:1.5;color:#e1f5fe"><b>Левый стик</b> — плыть<br><b>Свайп</b> — поворот камеры<br><b>ПАС</b> — пас партнеру<br><b>БРОСОК</b> — удерж. для силы</p><button id="st" type="button" onclick="st()">ИГРАТЬ</button></div>
 <script src="https://unpkg.com"></script>
 <script>
 const W=20,L=30,GW=3,GH=1,box=document.getElementById('g'),scene=new THREE.Scene();
@@ -43,8 +43,8 @@ const water=new THREE.Mesh(new THREE.PlaneGeometry(W,L),new THREE.MeshPhongMater
 water.rotation.x=-Math.PI/2;scene.add(water);
 const fl=new THREE.Mesh(new THREE.PlaneGeometry(W,L),new THREE.MeshBasicMaterial({color:0x26c6da}));fl.rotation.x=-Math.PI/2;fl.position.y=-1.2;scene.add(fl);
 const wm=new THREE.MeshLambertMaterial({color:0xeceff1});
-[[-W/2-.4,0,.8,L+1.6],[W/2+.4,0,.8,L+1.6],[0,-L/2-.4,W+1.6,.8],[0,L/2+.4,W+1.6,.8]].forEach(a=>{const m=new THREE.Mesh(new THREE.BoxGeometry(a,.8,a),wm);m.position.set(a,.2,a);scene.add(m)});
-[[0,0xffffff],[-L/2+2,0xe53935],[L/2-2,0xe53935],[-L/2+5,0xffeb3b],[L/2-5,0xffeb3b]].forEach(l=>{const m=new THREE.Mesh(new THREE.BoxGeometry(W+.9,.12,.15),new THREE.MeshBasicMaterial({color:l}));m.position.set(0,.58,l);scene.add(m)});
+[[-W/2-.4,0,.8,L+1.6],[W/2+.4,0,.8,L+1.6],[0,-L/2-.4,W+1.6,.8],[0,L/2+.4,W+1.6,.8]].forEach(a=>{const m=new THREE.Mesh(new THREE.BoxGeometry(a[2],.8,a[3]),wm);m.position.set(a[0],.2,a[1]);scene.add(m)});
+[[0,0xffffff],[-L/2+2,0xe53935],[L/2-2,0xe53935],[-L/2+5,0xffeb3b],[L/2-5,0xffeb3b]].forEach(l=>{const m=new THREE.Mesh(new THREE.BoxGeometry(W+.9,.12,.15),new THREE.MeshBasicMaterial({color:l[1]}));m.position.set(0,.58,l[0]);scene.add(m)});
 [-L/2+.2,L/2-.2].forEach(z=>{const g=new THREE.Group(),pm=new THREE.MeshLambertMaterial({color:0xffffff}),p1=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,GH),pm),p2=p1.clone(),tp=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,GW+.12),pm),nt=new THREE.Mesh(new THREE.BoxGeometry(GW,GH,.8),new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.4}));p1.position.set(-GW/2,GH/2,0);p2.position.set(GW/2,GH/2,0);tp.rotation.z=Math.PI/2;tp.position.set(0,GH,0);nt.position.set(0,GH/2,z<0?-.4:.4);g.add(p1,p2,tp,nt);g.position.set(0,0,z);scene.add(g)});
 function mkSw(t,gk){const r=new THREE.Group(),sk=new THREE.MeshLambertMaterial({color:0xffcc80}),cm=new THREE.MeshLambertMaterial({color:gk?0xd32f2f:(t=='blue'?0x1565c0:0xf5f5f5)}),bd=new THREE.Mesh(new THREE.BoxGeometry(.62,.25,.35),sk),hd=new THREE.Mesh(new THREE.SphereGeometry(.16,12,12),sk),cp=new THREE.Mesh(new THREE.SphereGeometry(.17,12,12,0,Math.PI*2,0,Math.PI*.6),cm),aL=new THREE.Mesh(new THREE.CylinderGeometry(.05,.04,.46),sk),aR=aL.clone(),rg=new THREE.Mesh(new THREE.RingGeometry(.5,.62,20),new THREE.MeshBasicMaterial({color:0xffeb3b,side:THREE.DoubleSide}));bd.position.y=.05;hd.position.set(0,.32,-.05);cp.position.copy(hd.position);aL.position.set(-.35,.22,-.05);aR.position.set(.35,.22,-.05);rg.rotation.x=-Math.PI/2;rg.position.y=.03;rg.visible=false;r.add(bd,hd,cp,aL,aR,rg);scene.add(r);return{r,aL,aR,rg}}
 const bm=new THREE.Mesh(new THREE.SphereGeometry(.14,12,12),new THREE.MeshLambertMaterial({color:0xffd600}));scene.add(bm);
@@ -56,12 +56,12 @@ function rst(t){pls.forEach(p=>{p.p.copy(p.h);p.y=p.t=='blue'?0:Math.PI});const 
 function gv(p){ball.ow=p;ball.v.set(0,0,0);if(p&&p.t=='blue')sCt(p)}
 function sCt(p){if(ct)ct.m.rg.visible=false;ct=p;if(ct){ct.m.rg.visible=true;yaw=ct.y}}
 let jv={x:0,y:0},jId=null;const joy=document.getElementById('joy'),kn=document.getElementById('kn');
-joy.addEventListener('touchstart',e=>{e.preventDefault();jId=e.changedTouches.identifier;mJ(e.changedTouches)},{passive:false});
+joy.addEventListener('touchstart',e=>{e.preventDefault();jId=e.changedTouches[0].identifier;mJ(e.changedTouches[0])},{passive:false});
 joy.addEventListener('touchmove',e=>{e.preventDefault();for(let t of e.changedTouches)if(t.identifier===jId)mJ(t)},{passive:false});
 joy.addEventListener('touchend',e=>{for(let t of e.changedTouches)if(t.identifier===jId){jId=null;jv={x:0,y:0};kn.style.transform=''}});
 function mJ(t){const r=joy.getBoundingClientRect();let dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy);if(d>40){dx=dx/d*40;dy=dy/d*40}kn.style.transform=`translate(${dx}px,${dy}px)`;jv={x:dx/40,y:dy/40}}
-let cId=null,lx=0;box.addEventListener('touchstart',e=>{cId=e.changedTouches.identifier;lx=e.changedTouches.clientX},{passive:true});
-box.addEventListener('touchmove',e=>{for(let t of e.changedTouches)if(t.identifier===cId){yaw-=(t.clientX-lx)*.008;lx=t.clientX;if(ctrl)ct.y=yaw}},{passive:true});
+let cId=null,lx=0;box.addEventListener('touchstart',e=>{cId=e.changedTouches[0].identifier;lx=e.changedTouches[0].clientX},{passive:true});
+box.addEventListener('touchmove',e=>{for(let t of e.changedTouches)if(t.identifier===cId){yaw-=(t.clientX-lx)*.008;lx=t.clientX;if(ct)ct.y=yaw}},{passive:true});
 document.getElementById('ps').addEventListener('touchstart',e=>{e.preventDefault();if(!run||!ct)return;if(ball.ow!==ct){let b=null,md=999;pls.filter(p=>p.t=='blue').forEach(p=>{let d=p.p.distanceTo(ball.p);if(d<md){md=d;b=p}});if(b)sCt(b);return}const fw=new THREE.Vector3(-Math.sin(ct.y),0,-Math.cos(ct.y));let tg=null,bs=-999;pls.filter(p=>p.t=='blue'&&p!==ct).forEach(p=>{let to=p.p.clone().sub(ct.p),sc=fw.dot(to.clone().normalize())*10-to.length()*.15;if(sc>bs){bs=sc;tg=p}});if(tg){let df=tg.p.clone().sub(ball.p),t=Math.max(.25,Math.hypot(df.x,df.z)/14);ball.ow=null;ball.v.set(df.x/t,4.9*t*.45,df.z/t);sCt(tg)}},{passive:false});
 let chg=false,pwr=0;const pW=document.getElementById('pw'),pF=document.getElementById('pf');
 document.getElementById('sh').addEventListener('touchstart',e=>{e.preventDefault();if(!run||ball.ow!==ct)return;chg=true;pwr=.3;pW.style.display='block'},{passive:false});
